@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/category_colors.dart';
 import '../viewmodel/expense_view_model.dart';
 import 'add_expense_page.dart';
 import 'edit_expense_page.dart';
@@ -20,6 +21,49 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
     });
   }
 
+  // 📅 Month name helper
+  String _monthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month - 1];
+  }
+
+  // 📅 Month selector
+  Widget _monthSelector(ExpenseViewModel vm) {
+    final year = DateTime.now().year;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Month',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          DropdownButton<DateTime>(
+            value: vm.selectedMonth,
+            underline: const SizedBox(),
+            items: List.generate(12, (i) {
+              final date = DateTime(year, i + 1);
+              return DropdownMenuItem(
+                value: date,
+                child: Text('${_monthName(date.month)} $year'),
+              );
+            }),
+            onChanged: (value) {
+              if (value != null) {
+                vm.changeMonth(value);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ExpenseViewModel>();
@@ -33,7 +77,7 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
       ),
       body: Column(
         children: [
-          // 🔝 TOTAL SUMMARY (GRADIENT CARD)
+          // 🔝 TOTAL SUMMARY
           Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(20),
@@ -46,10 +90,10 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
-                )
+                ),
               ],
             ),
             child: Row(
@@ -57,7 +101,7 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(
@@ -76,30 +120,36 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '৳ ${vm.totalExpense.toStringAsFixed(2)}',
+                      '৳ ${vm.filteredTotalExpense.toStringAsFixed(2)}',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
 
+          // 📅 Month selector
+          _monthSelector(vm),
+          const SizedBox(height: 8),
+
           // 🏷 CATEGORY ANALYTICS
-          if (vm.expenses.isNotEmpty)
+          if (vm.filteredExpenses.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: vm.categories.map((c) {
-                  final total = vm.categoryTotal(c);
+                  final total = vm.filteredCategoryTotal(c);
                   if (total == 0) return const SizedBox();
 
-                  final percent = vm.totalExpense == 0
+                  final percent = vm.filteredTotalExpense == 0
                       ? 0.0
-                      : total / vm.totalExpense;
+                      : total / vm.filteredTotalExpense;
+
+                  final color = CategoryColors.get(c);
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
@@ -111,13 +161,15 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                           children: [
                             Text(
                               c,
-                              style:
-                              const TextStyle(fontWeight: FontWeight.w500),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                             Text(
                               '৳ ${total.toStringAsFixed(0)}',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -128,10 +180,9 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                             value: percent,
                             minHeight: 8,
                             backgroundColor:
-                            Colors.indigo.withOpacity(0.15),
+                            color.withValues(alpha: 0.15),
                             valueColor:
-                            const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF5B6EE1)),
+                            AlwaysStoppedAnimation<Color>(color),
                           ),
                         ),
                       ],
@@ -144,21 +195,22 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
           const SizedBox(height: 12),
           const Divider(height: 1),
 
-          // 📋 EXPENSE LIST (PREMIUM CARDS)
+          // 📋 EXPENSE LIST
           Expanded(
-            child: vm.expenses.isEmpty
+            child: vm.filteredExpenses.isEmpty
                 ? const Center(
               child: Text(
-                'No expenses yet\nTap + to add',
+                'No expenses for this month',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
             )
                 : ListView.builder(
               padding: const EdgeInsets.all(12),
-              itemCount: vm.expenses.length,
+              itemCount: vm.filteredExpenses.length,
               itemBuilder: (_, i) {
-                final e = vm.expenses[i];
+                final e = vm.filteredExpenses[i];
+                final color = CategoryColors.get(e.category);
 
                 return Card(
                   elevation: 3,
@@ -170,12 +222,12 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                     leading: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.indigo.withOpacity(0.12),
+                        color: color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.receipt_long,
-                        color: Colors.indigo,
+                        color: color,
                       ),
                     ),
                     title: Text(
@@ -190,9 +242,10 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                       children: [
                         Text(
                           '৳ ${e.amount.toStringAsFixed(0)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
+                            color: color,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -209,8 +262,11 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                                   ),
                                 );
                               },
-                              child: const Icon(Icons.edit,
-                                  size: 18, color: Colors.blue),
+                              child: const Icon(
+                                Icons.edit,
+                                size: 18,
+                                color: Colors.blue,
+                              ),
                             ),
                             const SizedBox(width: 14),
                             GestureDetector(
@@ -229,11 +285,14 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                                   );
                                 }
                               },
-                              child: const Icon(Icons.delete,
-                                  size: 18, color: Colors.red),
+                              child: const Icon(
+                                Icons.delete,
+                                size: 18,
+                                color: Colors.red,
+                              ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -244,28 +303,16 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
         ],
       ),
 
-      // ➕ MODERN FAB
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.indigo.withOpacity(0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            )
-          ],
-        ),
-        child: FloatingActionButton(
-          backgroundColor: const Color(0xFF5B6EE1),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AddExpensePage()),
-            );
-          },
-          child: const Icon(Icons.add, size: 28),
-        ),
+      // ➕ FAB
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF5B6EE1),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddExpensePage()),
+          );
+        },
+        child: const Icon(Icons.add, size: 28),
       ),
     );
   }
