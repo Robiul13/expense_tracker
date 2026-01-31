@@ -23,81 +23,219 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ExpenseViewModel>();
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Expense Tracker')),
+      appBar: AppBar(
+        title: const Text('Expense Tracker'),
+        centerTitle: true,
+        elevation: 0,
+      ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Total: ৳ ${vm.totalExpense.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headlineSmall,
+          // 🔝 TOTAL SUMMARY (GRADIENT CARD)
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF5B6EE1), Color(0xFF7C8CF4)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.account_balance_wallet,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Total Expense',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '৳ ${vm.totalExpense.toStringAsFixed(2)}',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
 
-          Column(
-            children: vm.categories.map((c) {
-              final total = vm.categoryTotal(c);
-              if (total == 0) return const SizedBox();
-              return Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(c),
-                    Text('৳ ${total.toStringAsFixed(2)}'),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
+          // 🏷 CATEGORY ANALYTICS
+          if (vm.expenses.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: vm.categories.map((c) {
+                  final total = vm.categoryTotal(c);
+                  if (total == 0) return const SizedBox();
 
-          const Divider(),
+                  final percent = vm.totalExpense == 0
+                      ? 0.0
+                      : total / vm.totalExpense;
 
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              c,
+                              style:
+                              const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            Text(
+                              '৳ ${total.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: percent,
+                            minHeight: 8,
+                            backgroundColor:
+                            Colors.indigo.withOpacity(0.15),
+                            valueColor:
+                            const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF5B6EE1)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+
+          // 📋 EXPENSE LIST (PREMIUM CARDS)
           Expanded(
             child: vm.expenses.isEmpty
-                ? const Center(child: Text('No expenses'))
+                ? const Center(
+              child: Text(
+                'No expenses yet\nTap + to add',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
                 : ListView.builder(
+              padding: const EdgeInsets.all(12),
               itemCount: vm.expenses.length,
               itemBuilder: (_, i) {
                 final e = vm.expenses[i];
-                return ListTile(
-                  title: Text(e.title),
-                  subtitle: Text('${e.category} • ${e.date}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  EditExpensePage(expense: e),
+
+                return Card(
+                  elevation: 3,
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.receipt_long,
+                        color: Colors.indigo,
+                      ),
+                    ),
+                    title: Text(
+                      e.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text('${e.category} • ${e.date}'),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '৳ ${e.amount.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        EditExpensePage(expense: e),
+                                  ),
+                                );
+                              },
+                              child: const Icon(Icons.edit,
+                                  size: 18, color: Colors.blue),
                             ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon:
-                        const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          final confirmed =
-                          await showDeleteConfirmDialog(context);
-                          if (confirmed == true) {
-                            await vm.deleteExpense(e.id!);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Expense deleted'),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ],
+                            const SizedBox(width: 14),
+                            GestureDetector(
+                              onTap: () async {
+                                final confirmed =
+                                await showDeleteConfirmDialog(
+                                    context);
+                                if (confirmed == true) {
+                                  await vm.deleteExpense(e.id!);
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                      Text('Expense deleted'),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Icon(Icons.delete,
+                                  size: 18, color: Colors.red),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 );
               },
@@ -106,19 +244,33 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
         ],
       ),
 
-      // ➕ Add
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddExpensePage()),
-          );
-        },
-        child: const Icon(Icons.add),
+      // ➕ MODERN FAB
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.indigo.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            )
+          ],
+        ),
+        child: FloatingActionButton(
+          backgroundColor: const Color(0xFF5B6EE1),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddExpensePage()),
+            );
+          },
+          child: const Icon(Icons.add, size: 28),
+        ),
       ),
     );
   }
 
+  // 🗑 Confirm dialog
   Future<bool?> showDeleteConfirmDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,
