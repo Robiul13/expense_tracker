@@ -1,8 +1,16 @@
 # 💸 Expense Tracker App (Flutter)
 
-A **modern, finance-grade Expense Tracker application** built with **Flutter**, following **MVVM architecture**, **Provider state management**, and **SQLite (sqflite)** for reliable local data persistence.
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-3.x-blue" />
+  <img src="https://img.shields.io/badge/Dart-3.x-blue" />
+  <img src="https://img.shields.io/badge/Architecture-MVVM-success" />
+  <img src="https://img.shields.io/badge/State%20Management-Provider-purple" />
+  <img src="https://img.shields.io/badge/Database-SQLite-orange" />
+</p>
 
-This project is designed as a **scalable and production-ready foundation** for:
+A **modern, finance‑grade Expense Tracker application** built with **Flutter**, following **MVVM architecture**, **Provider state management**, and **SQLite (sqflite)** for reliable local data persistence.
+
+This project is designed as a **portfolio‑ready and production‑quality foundation** for:
 
 * Personal finance apps
 * HRMS expense modules
@@ -10,24 +18,33 @@ This project is designed as a **scalable and production-ready foundation** for:
 
 ---
 
+## 📸 App Preview
+
+<p align="center">
+  <img src="screenshots/Screenshot_20260131_004653.png" width="320" />
+</p>
+
+---
+
 ## ✨ Highlights
 
-* Clean & modern UI (finance dashboard style)
-* Clear separation of UI, logic, and data
-* Offline-first with local database
-* Beginner-friendly yet industry-standard architecture
+* Clean & modern finance dashboard UI
+* Category‑wise analytics with visual indicators
+* Offline‑first architecture using local database
+* Scalable MVVM structure suitable for large apps
+* Beginner‑friendly yet industry‑standard codebase
 
 ---
 
 ## 🚀 Features
 
 * ✅ Add, edit, and delete expenses
-* ✅ Category-wise expense tracking
-* ✅ Category-wise total & analytics
+* ✅ Category‑wise expense tracking
+* ✅ Category‑wise totals with progress analytics
 * ✅ Overall expense summary dashboard
 * ✅ Persistent local storage using SQLite
 * ✅ Clean MVVM architecture
-* ✅ Provider-based state management
+* ✅ Provider‑based state management
 * ✅ Safe delete with confirmation dialog
 * ✅ Modern, professional UI/UX
 
@@ -51,8 +68,8 @@ SQLite Database
 
 * 🔹 Clear separation of concerns
 * 🔹 Easy to maintain and scale
-* 🔹 Test-friendly structure
-* 🔹 Widely used in real-world Flutter apps
+* 🔹 Test‑friendly structure
+* 🔹 Widely used in real‑world Flutter applications
 
 ---
 
@@ -153,12 +170,6 @@ flutter run
 
 ---
 
-## 📸 Screenshots
-
-Screenshots are available in the `screenshots/` directory for UI showcase and portfolio presentation.
-
----
-
 ## 🔮 Future Enhancements
 
 * 📊 Pie / Bar charts for expense analytics
@@ -181,7 +192,7 @@ Flutter & Backend Developer
 
 ## 📄 License
 
-This project is open-source and available under the **MIT License**.
+This project is open‑source and available under the **MIT License**.
 
 ---
 
