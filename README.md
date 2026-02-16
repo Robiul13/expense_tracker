@@ -1,3 +1,6 @@
+
+---
+
 # 💸 Expense Tracker App (Flutter)
 
 <p align="center">
@@ -6,109 +9,125 @@
   <img src="https://img.shields.io/badge/Architecture-MVVM-success" />
   <img src="https://img.shields.io/badge/State%20Management-Provider-purple" />
   <img src="https://img.shields.io/badge/Database-SQLite-orange" />
+  <img src="https://img.shields.io/badge/Backend-Supabase-green" />
+  <img src="https://img.shields.io/badge/Mode-Offline--First-important" />
 </p>
 
-A **modern, finance‑grade Expense Tracker application** built with **Flutter**, following **MVVM architecture**, **Provider state management**, and **SQLite (sqflite)** for reliable local data persistence.
+A **modern, finance-grade Expense Tracker application** built with **Flutter**, following **MVVM architecture**, **Provider state management**, and a powerful **Hybrid Database architecture (SQLite + Supabase Cloud Sync)**.
 
-This project is designed as a **portfolio‑ready and production‑quality foundation** for:
+This project demonstrates a **production-ready offline-first system** where:
 
-* Personal finance apps
-* HRMS expense modules
-* Enterprise budgeting solutions
-
----
-
-## 📸 App Preview
-
-<p align="center">
-  <img src="screenshots/Screenshot_20260131_004653.png" width="320" />
-</p>
+* Data is stored locally (SQLite)
+* Automatically synced to cloud (Supabase)
+* Fully authenticated user-based access
+* Secure and scalable architecture
 
 ---
 
-## ✨ Highlights
+# 🚀 Key Features
 
-* Clean & modern finance dashboard UI
-* Category‑wise analytics with visual indicators
-* Offline‑first architecture using local database
-* Scalable MVVM structure suitable for large apps
-* Beginner‑friendly yet industry‑standard codebase
+### 🔐 Authentication (Supabase)
+
+* Email & Password login
+* Secure session handling
+* Auth error mapping
+* Professional state management
+
+### 💾 Hybrid Database System
+
+* SQLite (Local persistence)
+* Supabase (Cloud storage)
+* Auto sync when internet available
+* Unsynced queue handling
+* Offline-first support
+
+### 📊 Expense Management
+
+* Add / Edit / Delete expenses
+* Category-based analytics
+* Monthly filtering
+* Progress indicators
+* Modern dashboard UI
+
+### 🧠 Architecture
+
+* MVVM (Model–View–ViewModel)
+* Repository Pattern
+* Hybrid Repository (Local + Remote)
+* Clean separation of concerns
+* Production-grade state handling
 
 ---
 
-## 🚀 Features
-
-* ✅ Add, edit, and delete expenses
-* ✅ Category‑wise expense tracking
-* ✅ Category‑wise totals with progress analytics
-* ✅ Overall expense summary dashboard
-* ✅ Persistent local storage using SQLite
-* ✅ Clean MVVM architecture
-* ✅ Provider‑based state management
-* ✅ Safe delete with confirmation dialog
-* ✅ Modern, professional UI/UX
-
----
-
-## 🏗 Architecture Overview
-
-The application follows the **MVVM (Model–View–ViewModel)** pattern:
+# 🏗 Architecture Overview
 
 ```text
 UI (View)
    ↓
-ViewModel (State + Business Logic)
+ViewModel (Business Logic)
    ↓
-Model (Data Layer)
-   ↓
-SQLite Database
+Hybrid Repository
+   ↓              ↓
+SQLite (Local)   Supabase (Cloud)
 ```
 
-### Why MVVM?
+### Why Hybrid?
 
-* 🔹 Clear separation of concerns
-* 🔹 Easy to maintain and scale
-* 🔹 Test‑friendly structure
-* 🔹 Widely used in real‑world Flutter applications
+✔ Works fully offline
+✔ Syncs automatically when online
+✔ Enterprise scalable
+✔ Finance-app ready
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
 ```text
 lib/
- ├─ model/
- │   └─ expense_model.dart
+ ├─ auth/
+ │   ├─ auth_provider.dart
+ │   ├─ auth_service.dart
+ │   ├─ login_page.dart
+ │   └─ register_page.dart
+ │
+ ├─ core/
+ │   └─ category_colors.dart
  │
  ├─ db/
- │   └─ expense_db.dart
+ │   ├─ expense_db.dart
+ │   └─ hybrid_expense_repository.dart
  │
- ├─ viewmodel/
- │   └─ expense_view_model.dart
+ ├─ model/
+ │   └─ expense_model.dart
  │
  ├─ view/
  │   ├─ expense_home_page.dart
  │   ├─ add_expense_page.dart
  │   └─ edit_expense_page.dart
  │
+ ├─ viewmodel/
+ │   └─ expense_view_model.dart
+ │
  └─ main.dart
 ```
 
 ---
 
-## 🧱 Tech Stack
+# 🧱 Tech Stack
 
-| Layer            | Technology           |
-| ---------------- | -------------------- |
-| UI               | Flutter (Material 3) |
-| State Management | Provider             |
-| Architecture     | MVVM                 |
-| Local Database   | SQLite (sqflite)     |
-| Language         | Dart                 |
+| Layer        | Technology           |
+| ------------ | -------------------- |
+| UI           | Flutter (Material 3) |
+| State        | Provider             |
+| Architecture | MVVM + Repository    |
+| Local DB     | SQLite (sqflite)     |
+| Cloud        | Supabase             |
+| Connectivity | connectivity_plus    |
+| Language     | Dart                 |
 
 ---
 
-## 📦 Dependencies
+# 📦 Dependencies
 
 ```yaml
 dependencies:
@@ -117,72 +136,109 @@ dependencies:
   provider: ^6.1.2
   sqflite: ^2.3.0
   path: ^1.9.0
+  supabase_flutter: ^2.x.x
+  connectivity_plus: ^5.x.x
 ```
 
 ---
 
-## 💾 Database Schema
+# 💾 Database Schema (Cloud - Supabase)
 
 ```sql
 CREATE TABLE expenses (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT,
-  amount REAL,
-  category TEXT,
-  date TEXT
+  id uuid PRIMARY KEY,
+  user_id uuid REFERENCES auth.users(id),
+  title text,
+  amount numeric,
+  category text,
+  created_at timestamptz default now(),
+  updated_at timestamptz,
+  is_synced boolean default false
 );
 ```
 
 ---
 
-## 🧠 Core Concepts Used
+# 🔒 Row Level Security (RLS)
 
-* ChangeNotifier & `notifyListeners()`
-* Provider (`watch` / `read`) pattern
-* SQLite CRUD operations
-* MVVM best practices
-* Clean UI–logic separation
-* Confirmation dialogs for destructive actions
+```sql
+CREATE POLICY "Users can view own expenses"
+ON expenses
+FOR SELECT
+USING (auth.uid() = user_id);
+```
+
+✔ Each user can only access their own data
+✔ Production-grade security
 
 ---
 
-## ▶️ Getting Started
+# 🧠 Core Concepts Used
 
-### 1️⃣ Clone the repository
+* ChangeNotifier
+* Provider (watch / read)
+* Supabase Auth
+* SQLite CRUD
+* Hybrid Sync Strategy
+* Offline-first Architecture
+* Professional Error Handling
+* RLS Policies
+* Production-ready folder structure
+
+---
+
+# ▶️ Getting Started
+
+### 1️⃣ Clone repository
 
 ```bash
-git clone https://github.com/Robiul13/expense-tracker-flutter.git
+git clone https://github.com/Robiul13/expense_tracker.git
 ```
 
-### 2️⃣ Install dependencies
+---
+
+### 2️⃣ Install packages
 
 ```bash
 flutter pub get
 ```
 
-### 3️⃣ Run the app
+---
+
+### 3️⃣ Configure Supabase
+
+Create `.env` file:
+
+```env
+SUPABASE_URL=your_project_url
+SUPABASE_ANON_KEY=your_anon_key
+```
+
+---
+
+### 4️⃣ Run app
 
 ```bash
 flutter run
 ```
 
-> ⚠️ If you change the database schema, **uninstall the app and run again** to recreate the local database.
-
 ---
 
-## 🔮 Future Enhancements
+# 🔮 Roadmap / Future Enhancements
 
-* 📊 Pie / Bar charts for expense analytics
-* 📅 Monthly & yearly filtering
-* 🏷 Custom categories
+* 📊 Charts (Pie / Bar)
+* 🔁 Auto background sync
+* ☁️ Realtime sync
 * 📤 Export to PDF / Excel
-* ☁️ Cloud sync (Firebase)
-* ⚡ Riverpod implementation
-* 🧪 Unit & widget tests
+* 🌍 Multi-currency
+* 🌙 Dark mode
+* 🔐 Biometric authentication
+* 🧪 Unit & integration tests
+* 🚀 CI/CD pipeline
 
 ---
 
-## 👨‍💻 Author
+# 👨‍💻 Author
 
 **Md. Robiul Islam**
 Flutter & Backend Developer
@@ -190,19 +246,19 @@ Flutter & Backend Developer
 
 ---
 
-## 📄 License
+# 📄 License
 
-This project is open‑source and available under the **MIT License**.
+MIT License
 
 ---
 
-## ⭐ Support & Contribution
+# ⭐ Support
 
-If you find this project useful:
+If you like this project:
 
-* ⭐ Star the repository
+* ⭐ Star the repo
 * 🍴 Fork it
-* 🐛 Report issues
+* 🐛 Open issues
 * 💡 Suggest improvements
 
-Contributions and feedback are always welcome 🙌
+---

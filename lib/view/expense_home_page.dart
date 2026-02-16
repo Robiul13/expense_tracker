@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../auth/auth_provider.dart';
+import '../auth/login_page.dart';
 import '../core/category_colors.dart';
 import '../viewmodel/expense_view_model.dart';
 import 'add_expense_page.dart';
@@ -71,6 +73,29 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
     );
   }
 
+  Future<bool?> _showLogoutDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ExpenseViewModel>();
@@ -78,8 +103,6 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
-
-      // 🔝 APP BAR (Cleaner)
       appBar: AppBar(
         title: const Text(
           'Expense Tracker',
@@ -89,6 +112,45 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black87,
+        actions: [
+          PopupMenuButton<String>(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            icon: const CircleAvatar(
+              backgroundColor: Color(0xFF5B6EE1),
+              child: Icon(Icons.person, color: Colors.white),
+            ),
+            onSelected: (value) async {
+              if (value == 'logout') {
+                final confirmed = await _showLogoutDialog(context);
+                if (confirmed == true) {
+                  await context.read<AuthProvider>().logout();
+                  if (context.mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
+                    );
+                  }
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.redAccent),
+                    SizedBox(width: 8),
+                    Text('Logout'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+        ],
       ),
 
       body: SingleChildScrollView(
@@ -224,8 +286,10 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                     ),
                   )
                 : ListView.builder(
-                    shrinkWrap: true, // 🔥 MUST
-                    physics: const NeverScrollableScrollPhysics(), // 🔥 MUST
+                    shrinkWrap: true,
+                    // 🔥 MUST
+                    physics: const NeverScrollableScrollPhysics(),
+                    // 🔥 MUST
                     padding: const EdgeInsets.fromLTRB(12, 4, 12, 80),
                     itemCount: vm.filteredExpenses.length,
                     itemBuilder: (_, i) {
@@ -262,7 +326,7 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           subtitle: Text(
-                            '${e.category} • ${e.date}',
+                            '${e.category} • ${e.createdAt}',
                             style: const TextStyle(fontSize: 13),
                           ),
                           trailing: Column(
@@ -286,7 +350,8 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => EditExpensePage(expense: e),
+                                          builder: (_) =>
+                                              EditExpensePage(expense: e),
                                         ),
                                       );
                                     },
@@ -300,11 +365,17 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                                   GestureDetector(
                                     onTap: () async {
                                       final confirmed =
-                                      await showDeleteConfirmDialog(context);
+                                          await showDeleteConfirmDialog(
+                                            context,
+                                          );
                                       if (confirmed == true) {
                                         await vm.deleteExpense(e.id!);
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Expense deleted')),
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Expense deleted'),
+                                          ),
                                         );
                                       }
                                     },
@@ -336,7 +407,7 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
             MaterialPageRoute(builder: (_) => const AddExpensePage()),
           );
         },
-        child: const Icon(Icons.add, size: 28),
+        child: const Icon(Icons.add, size: 24,color: Colors.white,),
       ),
     );
   }
