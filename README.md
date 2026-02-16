@@ -24,6 +24,12 @@ This project demonstrates a **production-ready offline-first system** where:
 
 ---
 
+## 📸 App Preview 
+<p align="center">
+<img src="screenshots/screenshotsScreenshot_20260131_004653.png" width="320" /> 
+</p> 
+
+---
 # 🚀 Key Features
 
 ### 🔐 Authentication (Supabase)
